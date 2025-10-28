@@ -1,0 +1,25 @@
+{
+  "name": "sentinelscan",
+  "version": "1.0.0",
+  "description": "A terminal-focused website security scanner CLI app",
+  "main": "src/cli.js",
+  "scripts": {
+    "start": "node --no-deprecation src/cli.js"
+  },
+  "dependencies": {
+    "inquirer": "^8.2.6",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "axios": "^1.6.0",
+    "pdfkit": "^0.14.0",
+    "csv-writer": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "cookie": "^0.5.0",
+    "groq-sdk": "^0.7.0",
+    "figlet": "^1.6.0",
+    "dotenv": "^16.4.5"
+  },
+  "keywords": ["security", "scanner", "cli", "web", "sentinelscan"],
+  "author": "",
+  "license": "MIT"
+}
