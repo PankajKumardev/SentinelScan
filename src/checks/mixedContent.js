@@ -1,5 +1,5 @@
-const { fetchPage } = require('../utils/fetchPage');
-const cheerio = require('cheerio');
+import { fetchPage } from '../utils/fetchPage.js';
+import * as cheerio from 'cheerio';
 
 async function check(url) {
   const parsedUrl = new URL(url);
@@ -30,4 +30,4 @@ async function check(url) {
   }
 }
 
-module.exports = { check };
+export { check };

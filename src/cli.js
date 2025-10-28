@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const figlet = require('figlet');
-const chalk = require('chalk');
-const scanner = require('./scanner');
+import figlet from 'figlet';
+import chalk from 'chalk';
+import { run } from './scanner.js';
 
 function renderBanner({ noBanner } = {}) {
   if (noBanner) return;
@@ -28,13 +28,23 @@ function renderBanner({ noBanner } = {}) {
 async function main() {
   console.clear();
 
-  // Allow disabling the banner with environment variable or CLI flag
-  const noBanner =
-    process.env.NO_BANNER === '1' || process.argv.includes('--no-banner');
+  // Parse command line arguments
+  const args = process.argv.slice(2);
+  const noBannerIndex = args.indexOf('--no-banner');
+  const noBanner = process.env.NO_BANNER === '1' || noBannerIndex !== -1;
+
+  // Remove --no-banner from args if present
+  if (noBannerIndex !== -1) {
+    args.splice(noBannerIndex, 1);
+  }
+
+  // Pass filtered args to scanner
+  process.argv = [process.argv[0], process.argv[1], ...args];
+
   renderBanner({ noBanner });
 
   try {
-    await scanner.run();
+    await run();
   } catch (error) {
     console.error(chalk.red('An error occurred:'), error.message);
     process.exit(1);

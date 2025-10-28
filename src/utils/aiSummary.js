@@ -1,12 +1,45 @@
-require('dotenv').config();
+import Groq from 'groq-sdk';
+import dotenv from 'dotenv';
 
-const Groq = require('groq-sdk');
+dotenv.config();
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+class AIAnalyzer {
+  constructor() {
+    this.groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  }
 
-async function generateSummary(results) {
-  try {
-    const prompt = `Analyze this web security scan report and provide a structured response in JSON format with the following fields:
+  async generateSummary(results) {
+    try {
+      const prompt = this.buildPrompt(results);
+      const chatCompletion = await this.groq.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+        temperature: 0.3,
+        max_tokens: 500,
+      });
+
+      const content = chatCompletion.choices[0]?.message?.content || '{}';
+      const parsed = this.parseResponse(content);
+
+      return {
+        summary: parsed.summary || 'Analysis unavailable',
+        rating: parsed.rating || 'N/A',
+        recommendations: Array.isArray(parsed.recommendations)
+          ? parsed.recommendations
+          : ['Unable to generate recommendations'],
+      };
+    } catch (error) {
+      console.warn('AI summary generation failed:', error.message);
+      return {
+        summary: 'AI analysis failed - manual review recommended',
+        rating: 'N/A',
+        recommendations: ['Review scan results manually'],
+      };
+    }
+  }
+
+  buildPrompt(results) {
+    return `Analyze this web security scan report and provide a structured response in JSON format with the following fields:
 - summary: A brief overall assessment (2-3 sentences)
 - rating: A letter grade (A, B, C, D, F) based on security posture
 - recommendations: An array of 3-5 specific actionable recommendations to improve security
@@ -17,16 +50,9 @@ Timestamp: ${results.timestamp}
 Results: ${JSON.stringify(results.results, null, 2)}
 
 Respond only with valid JSON, no additional text.`;
+  }
 
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [{ role: 'user', content: prompt }],
-      model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
-      temperature: 0.3,
-      max_tokens: 500,
-    });
-
-    const content = chatCompletion.choices[0]?.message?.content || '{}';
-
+  parseResponse(content) {
     // Extract JSON from markdown code blocks if present
     let jsonContent = content.trim();
     if (jsonContent.includes('```')) {
@@ -38,23 +64,8 @@ Respond only with valid JSON, no additional text.`;
       }
     }
 
-    const parsed = JSON.parse(jsonContent);
-
-    return {
-      summary: parsed.summary || 'Analysis unavailable',
-      rating: parsed.rating || 'N/A',
-      recommendations: Array.isArray(parsed.recommendations)
-        ? parsed.recommendations
-        : ['Unable to generate recommendations'],
-    };
-  } catch (error) {
-    console.warn('AI summary generation failed:', error.message);
-    return {
-      summary: 'AI analysis failed - manual review recommended',
-      rating: 'N/A',
-      recommendations: ['Review scan results manually'],
-    };
+    return JSON.parse(jsonContent);
   }
 }
 
-module.exports = { generateSummary };
+export default AIAnalyzer;

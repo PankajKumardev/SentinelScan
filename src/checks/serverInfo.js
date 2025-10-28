@@ -1,4 +1,4 @@
-const { fetchHead } = require('../utils/fetchPage');
+import { fetchHead } from '../utils/fetchPage.js';
 
 async function check(url) {
   try {
@@ -14,4 +14,4 @@ async function check(url) {
   }
 }
 
-module.exports = { check };
+export { check };

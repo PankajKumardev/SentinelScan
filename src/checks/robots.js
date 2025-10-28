@@ -1,4 +1,4 @@
-const { fetchPage } = require('../utils/fetchPage');
+import { fetchPage } from '../utils/fetchPage.js';
 
 async function check(url) {
   const parsedUrl = new URL(url);
@@ -23,4 +23,4 @@ async function check(url) {
   }
 }
 
-module.exports = { check };
+export { check };

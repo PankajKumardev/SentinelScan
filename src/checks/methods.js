@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const methods = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'];
 
@@ -26,4 +26,4 @@ async function check(url) {
   return { allowed };
 }
 
-module.exports = { check };
+export { check };

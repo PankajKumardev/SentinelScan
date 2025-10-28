@@ -1,4 +1,4 @@
-const https = require('https');
+import https from 'https';
 
 async function check(url) {
   const parsedUrl = new URL(url);
@@ -45,4 +45,4 @@ async function check(url) {
   });
 }
 
-module.exports = { check };
+export { check };

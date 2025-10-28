@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 async function check(url) {
   const evilUrl = 'http://evil.com';
@@ -41,4 +41,4 @@ async function check(url) {
   }
 }
 
-module.exports = { check };
+export { check };

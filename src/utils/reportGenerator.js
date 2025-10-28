@@ -1,8 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const PDFDocument = require('pdfkit');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-const { generateSummary } = require('./aiSummary');
+import fs from 'fs';
+import path from 'path';
+import PDFDocument from 'pdfkit';
+import { createObjectCsvWriter } from 'csv-writer';
+import AIAnalyzer from './aiSummary.js';
+
+const aiAnalyzer = new AIAnalyzer();
 
 async function generate(results, format, outputDir) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -10,7 +12,7 @@ async function generate(results, format, outputDir) {
   const filepath = path.join(outputDir, filename);
 
   // Generate AI summary
-  const aiSummary = await generateSummary(results);
+  const aiSummary = await aiAnalyzer.generateSummary(results);
   results.aiSummary = aiSummary;
 
   switch (format) {
@@ -97,7 +99,7 @@ async function generateCSV(results, filepath) {
     }
   }
 
-  const csvWriter = createCsvWriter({
+  const csvWriter = createObjectCsvWriter({
     path: filepath,
     header: [
       { id: 'check', title: 'Check' },
@@ -113,4 +115,4 @@ async function generateJSON(results, filepath) {
   fs.writeFileSync(filepath, JSON.stringify(results, null, 2));
 }
 
-module.exports = { generate };
+export { generate };

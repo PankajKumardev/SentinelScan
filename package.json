@@ -1,5 +1,5 @@
 {
-  "name": "sentinelscan",
+  "type": "module",
   "version": "1.0.0",
   "description": "A terminal-focused website security scanner CLI app",
   "main": "src/cli.js",

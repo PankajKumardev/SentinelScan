@@ -1,5 +1,5 @@
-const { fetchHead } = require('../utils/fetchPage');
-const cookie = require('cookie');
+import { fetchHead } from '../utils/fetchPage.js';
+import cookie from 'cookie';
 
 async function check(url) {
   try {
@@ -30,4 +30,4 @@ async function check(url) {
   }
 }
 
-module.exports = { check };
+export { check };

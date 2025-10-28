@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 async function fetchPage(url, options = {}) {
   const config = {
@@ -34,4 +34,4 @@ async function fetchHead(url, options = {}) {
   }
 }
 
-module.exports = { fetchPage, fetchHead };
+export { fetchPage, fetchHead };

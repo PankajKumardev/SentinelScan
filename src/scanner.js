@@ -1,9 +1,9 @@
-const inquirer = require('inquirer');
-const ora = require('ora');
-const chalk = require('chalk');
-const path = require('path');
-const fs = require('fs');
-const reportGenerator = require('./utils/reportGenerator');
+import inquirer from 'inquirer';
+import ora from 'ora';
+import chalk from 'chalk';
+import path from 'path';
+import fs from 'fs';
+import { generate } from './utils/reportGenerator.js';
 
 const checks = [
   { name: 'All Checks', value: 'all' },
@@ -121,7 +121,7 @@ async function run() {
   for (const check of selectedChecks) {
     const spinner = ora(`Running ${check} check...`).start();
     try {
-      const checkModule = require(`./checks/${check}`);
+      const checkModule = await import(`./checks/${check}.js`);
       const result = await checkModule.check(url);
       results.results[check] = result;
       spinner.succeed(`${check} check completed`);
@@ -133,13 +133,9 @@ async function run() {
 
   console.log(chalk.blue('\nGenerating report...\n'));
 
-  const reportPath = await reportGenerator.generate(
-    results,
-    format,
-    outputPath
-  );
+  const reportPath = await generate(results, format, outputPath);
 
   console.log(chalk.green(`Report generated: ${reportPath}`));
 }
 
-module.exports = { run };
+export { run };
