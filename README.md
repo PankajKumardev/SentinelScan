@@ -2,8 +2,6 @@
 
 A powerful, modular terminal-focused website security scanner built with Node.js. Perform comprehensive security audits of websites through an interactive CLI interface with clean progress indicators and detailed reporting.
 
-![Security Scan Demo](https://via.placeholder.com/800x400/2d3748/ffffff?text=Web+Security+Scanner+Demo)
-
 ## 🚀 Why This Project?
 
 In today's digital landscape, web security is paramount. SentinelScan helps developers, security professionals, and website owners quickly identify common security vulnerabilities and misconfigurations. Unlike complex enterprise tools, SentinelScan is:
