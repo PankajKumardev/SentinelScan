@@ -4,22 +4,30 @@
   "description": "A terminal-focused website security scanner CLI app",
   "main": "src/cli.js",
   "scripts": {
-    "start": "node --no-deprecation src/cli.js"
+    "start": "node --no-deprecation src/cli.js",
+    "help" : "node src/cli.js --help",
+    "bulk" : "node src/cli.js --bulk-file bulk-urls.txt"
   },
   "dependencies": {
-    "inquirer": "^8.2.6",
-    "chalk": "^4.1.2",
-    "ora": "^5.4.1",
     "axios": "^1.6.0",
-    "pdfkit": "^0.14.0",
-    "csv-writer": "^1.6.0",
+    "chalk": "^4.1.2",
     "cheerio": "^1.0.0-rc.12",
     "cookie": "^0.5.0",
-    "groq-sdk": "^0.7.0",
+    "csv-writer": "^1.6.0",
+    "dotenv": "^16.4.5",
     "figlet": "^1.6.0",
-    "dotenv": "^16.4.5"
+    "groq-sdk": "^0.7.0",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1",
+    "pdfkit": "^0.14.0"
   },
-  "keywords": ["security", "scanner", "cli", "web", "sentinelscan"],
+  "keywords": [
+    "security",
+    "scanner",
+    "cli",
+    "web",
+    "sentinelscan"
+  ],
   "author": "",
   "license": "MIT"
 }

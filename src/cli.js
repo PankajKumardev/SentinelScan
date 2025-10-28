@@ -2,6 +2,7 @@
 
 import figlet from 'figlet';
 import chalk from 'chalk';
+import fs from 'fs';
 import { run } from './scanner.js';
 
 function renderBanner({ noBanner } = {}) {
@@ -25,26 +26,112 @@ function renderBanner({ noBanner } = {}) {
   }
 }
 
+function showHelp() {
+  console.log(chalk.yellow('Usage:'));
+  console.log('  npm start [options] [url] [checks] [format] [output-dir]');
+  console.log('  npm start --bulk-file <file>');
+  console.log('');
+  console.log(chalk.yellow('Options:'));
+  console.log('  --help, -h          Show this help message');
+  console.log('  --no-banner         Hide the banner');
+  console.log(
+    '  --bulk-file <file>  Scan multiple URLs from a file (one URL per line)'
+  );
+  console.log('');
+  console.log(chalk.yellow('Arguments:'));
+  console.log(
+    '  url                 Website URL to scan (e.g., https://example.com)'
+  );
+  console.log(
+    '  checks              Comma-separated list of checks (default: all)'
+  );
+  console.log(
+    '  format              Report format: PDF, CSV, or JSON (default: JSON)'
+  );
+  console.log('  output-dir          Output directory (default: ./reports)');
+  console.log('');
+  console.log(chalk.yellow('Available checks:'));
+  console.log('  tls, headers, methods, mixedContent, robots, cookies, xss,');
+  console.log(
+    '  openRedirect, cors, serverInfo, directoryListing, sqlInjection,'
+  );
+  console.log('  csrf, sslCipher, dnsSecurity, brokenAuth, clickjacking,');
+  console.log('  sessionManagement, fileUpload, rateLimiting');
+  console.log('');
+  console.log(chalk.yellow('Examples:'));
+  console.log('  npm start https://example.com');
+  console.log('  npm start https://example.com tls,headers,xss PDF');
+  console.log('  npm start --bulk-file urls.txt');
+  console.log(
+    '  npm start --no-banner https://example.com all JSON ./my-reports'
+  );
+}
+
 async function main() {
   console.clear();
 
   // Parse command line arguments
   const args = process.argv.slice(2);
+
+  // Check for help first
+  const helpIndex = args.indexOf('--help');
+  const hIndex = args.indexOf('-h');
+  if (helpIndex !== -1 || hIndex !== -1) {
+    renderBanner();
+    showHelp();
+    process.exit(0);
+  }
+
   const noBannerIndex = args.indexOf('--no-banner');
   const noBanner = process.env.NO_BANNER === '1' || noBannerIndex !== -1;
 
-  // Remove --no-banner from args if present
-  if (noBannerIndex !== -1) {
-    args.splice(noBannerIndex, 1);
+  // Check for bulk file
+  const bulkIndex = args.indexOf('--bulk-file');
+  let bulkUrls = [];
+  if (bulkIndex !== -1 && args[bulkIndex + 1]) {
+    const bulkFile = args[bulkIndex + 1];
+    try {
+      const content = fs.readFileSync(bulkFile, 'utf8');
+      bulkUrls = content
+        .split('\n')
+        .map((url) => url.trim())
+        .filter((url) => url && url.startsWith('http'));
+      // Remove --bulk-file and filename from args
+      args.splice(bulkIndex, 2);
+    } catch (error) {
+      console.error(chalk.red('Error reading bulk file:'), error.message);
+      process.exit(1);
+    }
   }
 
-  // Pass filtered args to scanner
-  process.argv = [process.argv[0], process.argv[1], ...args];
+  // Remove --no-banner from args if present (recalculate index after bulk removal)
+  const updatedNoBannerIndex = args.indexOf('--no-banner');
+  if (updatedNoBannerIndex !== -1) {
+    args.splice(updatedNoBannerIndex, 1);
+  }
 
   renderBanner({ noBanner });
 
   try {
-    await run();
+    if (bulkUrls.length > 0) {
+      console.log(
+        chalk.blue(`Starting bulk scan of ${bulkUrls.length} URLs...\n`)
+      );
+      for (let i = 0; i < bulkUrls.length; i++) {
+        const url = bulkUrls[i];
+        console.log(
+          chalk.yellow(`Scanning ${i + 1}/${bulkUrls.length}: ${url}`)
+        );
+        // Modify argv for this URL
+        process.argv = [process.argv[0], process.argv[1], url, ...args];
+        await run();
+        console.log(''); // Empty line between scans
+      }
+    } else {
+      // Pass filtered args to scanner
+      process.argv = [process.argv[0], process.argv[1], ...args];
+      await run();
+    }
   } catch (error) {
     console.error(chalk.red('An error occurred:'), error.message);
     process.exit(1);

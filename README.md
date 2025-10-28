@@ -8,7 +8,7 @@ In today's digital landscape, web security is paramount. SentinelScan helps deve
 
 - **Free and Open Source**: No licensing fees or subscriptions
 - **Easy to Use**: Simple CLI interface with interactive prompts
-- **Comprehensive**: Covers 11 critical security checks
+- **Comprehensive**: Covers 20 critical security checks
 - **Modular**: Easily extensible with new security checks
 - **Fast**: Runs checks sequentially with progress indicators
 - **Multiple Outputs**: Generate reports in PDF, CSV, or JSON formats
@@ -79,6 +79,60 @@ In today's digital landscape, web security is paramount. SentinelScan helps deve
 - Tests common directories for directory listing enabled
 - Checks for exposed sensitive directories like /admin/, /backup/
 
+### 12. SQL Injection Vulnerability Test
+
+- Tests for basic SQL injection vulnerabilities
+- Injects common SQL payloads and checks for error responses
+- Identifies potential database vulnerabilities
+
+### 13. CSRF Token Validation Check
+
+- Analyzes HTML forms for CSRF token presence
+- Checks state-changing forms (POST, PUT, DELETE) for token protection
+- Identifies forms vulnerable to Cross-Site Request Forgery
+
+### 14. SSL/TLS Cipher Suite Analysis
+
+- Evaluates SSL/TLS cipher suite strength
+- Checks for weak or deprecated ciphers
+- Validates protocol version security
+
+### 15. DNS Security Analysis
+
+- Checks for DNSSEC implementation
+- Validates CAA (Certificate Authority Authorization) records
+- Tests SPF and DKIM record presence for email security
+
+### 16. Broken Authentication Detection
+
+- Analyzes login forms for security weaknesses
+- Checks for proper POST method usage
+- Identifies missing username fields and insecure configurations
+
+### 17. Clickjacking Vulnerability Test
+
+- Tests for X-Frame-Options header protection
+- Checks CSP frame-ancestors directive
+- Detects JavaScript frame-busting code
+
+### 18. Session Management Analysis
+
+- Examines session cookies for security flags
+- Checks for Secure, HttpOnly, and SameSite attributes
+- Identifies overly long session expirations
+
+### 19. File Upload Vulnerabilities
+
+- Scans for file upload forms and configurations
+- Checks for proper enctype and method usage
+- Tests for dangerous file type restrictions
+
+### 20. Rate Limiting Assessment
+
+- Tests server response to multiple rapid requests
+- Detects rate limiting and throttling mechanisms
+- Identifies potential DDoS vulnerabilities
+
 ## 📦 Installation
 
 ### Prerequisites
@@ -117,17 +171,32 @@ Follow the interactive prompts:
 node src/cli.js <url> <checks> <format> <outputDir>
 ```
 
+#### Options:
+
+- `--help, -h`: Show help message with usage instructions
+- `--no-banner`: Hide the SentinelScan banner
+- `--bulk-file <file>`: Scan multiple URLs from a file (one URL per line)
+
 #### Examples:
 
 ```bash
+# Show help
+node src/cli.js --help
+
 # Full scan with all checks
-node src/cli.js https://example.com tls,headers,methods,mixedContent,robots,cookies,xss,openRedirect,cors,serverInfo,directoryListing JSON ./reports
+node src/cli.js https://example.com tls,headers,methods,mixedContent,robots,cookies,xss,openRedirect,cors,serverInfo,directoryListing,sqlInjection,csrf,sslCipher,dnsSecurity,brokenAuth,clickjacking,sessionManagement,fileUpload,rateLimiting JSON ./reports
 
 # Quick SSL check only
 node src/cli.js https://github.com tls JSON ./reports
 
 # Security headers audit
 node src/cli.js https://example.com headers PDF ./reports
+
+# Bulk scanning multiple URLs
+node src/cli.js --bulk-file urls.txt tls,headers JSON ./reports
+
+# Hide banner for scripts
+node src/cli.js --no-banner https://example.com all JSON ./reports
 ```
 
 ## 🤖 AI-Powered Analysis
@@ -168,10 +237,20 @@ sentinelscan/
 │   │   ├── openRedirect.js # Open redirect testing
 │   │   ├── cors.js         # CORS misconfiguration
 │   │   ├── serverInfo.js   # Server info disclosure
-│   │   └── directoryListing.js # Directory listing vuln
+│   │   ├── directoryListing.js # Directory listing vuln
+│   │   ├── sqlInjection.js # SQL injection testing
+│   │   ├── csrf.js         # CSRF token validation
+│   │   ├── sslCipher.js    # SSL cipher analysis
+│   │   ├── dnsSecurity.js  # DNS security checks
+│   │   ├── brokenAuth.js   # Broken authentication detection
+│   │   ├── clickjacking.js # Clickjacking vulnerability test
+│   │   ├── sessionManagement.js # Session management analysis
+│   │   ├── fileUpload.js   # File upload vulnerabilities
+│   │   └── rateLimiting.js # Rate limiting assessment
 │   └── utils/
 │       ├── fetchPage.js    # HTTP request utilities
-│       └── reportGenerator.js # Report generation
+│       ├── reportGenerator.js # Report generation
+│       └── aiSummary.js    # AI analysis integration
 ├── reports/                # Default output directory
 ├── package.json            # Dependencies and scripts
 └── README.md              # This file

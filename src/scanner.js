@@ -27,6 +27,15 @@ const checks = [
   { name: 'CORS misconfiguration check', value: 'cors' },
   { name: 'Server information disclosure', value: 'serverInfo' },
   { name: 'Directory listing vulnerability', value: 'directoryListing' },
+  { name: 'SQL injection vulnerability test', value: 'sqlInjection' },
+  { name: 'CSRF token validation check', value: 'csrf' },
+  { name: 'SSL/TLS cipher suite analysis', value: 'sslCipher' },
+  { name: 'DNS security (DNSSEC, CAA, SPF, DKIM)', value: 'dnsSecurity' },
+  { name: 'Broken authentication detection', value: 'brokenAuth' },
+  { name: 'Clickjacking vulnerability test', value: 'clickjacking' },
+  { name: 'Session management analysis', value: 'sessionManagement' },
+  { name: 'File upload vulnerabilities', value: 'fileUpload' },
+  { name: 'Rate limiting assessment', value: 'rateLimiting' },
 ];
 
 async function run() {
@@ -49,9 +58,28 @@ async function run() {
           'cors',
           'serverInfo',
           'directoryListing',
+          'sqlInjection',
+          'csrf',
+          'sslCipher',
+          'dnsSecurity',
+          'brokenAuth',
+          'clickjacking',
+          'sessionManagement',
+          'fileUpload',
+          'rateLimiting',
         ];
-    format = process.argv[4] || 'JSON';
+    // Parse format (support both --format and direct format)
+    let formatArg = process.argv[4];
+    if (formatArg?.startsWith('--')) {
+      formatArg = formatArg.slice(2).toUpperCase();
+    }
+    format = ['PDF', 'CSV', 'JSON'].includes(formatArg) ? formatArg : 'JSON';
     outputDir = process.argv[5] || './reports';
+
+    // Handle "All Checks" selection
+    if (selectedChecks.includes('all')) {
+      selectedChecks = checks.slice(1).map((c) => c.value);
+    }
   } else {
     // Interactive mode
     const answers = await inquirer.prompt([
