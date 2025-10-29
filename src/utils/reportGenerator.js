@@ -44,12 +44,41 @@ async function generatePDF(results, filepath) {
   if (results.aiSummary) {
     doc.fontSize(16).text('AI Security Assessment', { underline: true });
     doc.fontSize(12).text(`Rating: ${results.aiSummary.rating}`);
+    doc.text(`Risk Level: ${results.aiSummary.overallRisk}`);
+    doc.text(`Severity Score: ${results.aiSummary.severityScore}/100`);
     doc.text(`Summary: ${results.aiSummary.summary}`);
-    doc.text('Recommendations:');
+    doc.moveDown();
+
+    // Critical Issues
+    if (results.aiSummary.criticalIssues?.length > 0) {
+      doc.fontSize(14).text('Critical Issues:', { underline: true });
+      doc.fillColor('red');
+      results.aiSummary.criticalIssues.forEach((issue) => {
+        doc.text(`• ${issue}`);
+      });
+      doc.fillColor('black');
+      doc.moveDown();
+    }
+
+    // Recommendations
+    doc.fontSize(14).text('Key Recommendations:', { underline: true });
     results.aiSummary.recommendations.forEach((rec) => {
       doc.text(`• ${rec}`);
     });
     doc.moveDown();
+
+    // Immediate Actions
+    if (results.aiSummary.immediateActions?.length > 0) {
+      doc
+        .fontSize(14)
+        .text('Immediate Actions (24 hours):', { underline: true });
+      doc.fillColor('red');
+      results.aiSummary.immediateActions.forEach((action) => {
+        doc.text(`• ${action}`);
+      });
+      doc.fillColor('black');
+      doc.moveDown();
+    }
   }
 
   for (const [check, result] of Object.entries(results.results)) {
@@ -77,9 +106,30 @@ async function generateCSV(results, filepath) {
     });
     records.push({
       check: 'AI Summary',
+      key: 'overall_risk',
+      value: results.aiSummary.overallRisk,
+    });
+    records.push({
+      check: 'AI Summary',
+      key: 'severity_score',
+      value: results.aiSummary.severityScore,
+    });
+    records.push({
+      check: 'AI Summary',
       key: 'summary',
       value: results.aiSummary.summary,
     });
+
+    // Add critical issues
+    if (results.aiSummary.criticalIssues?.length > 0) {
+      records.push({
+        check: 'AI Summary',
+        key: 'critical_issues',
+        value: results.aiSummary.criticalIssues.join('; '),
+      });
+    }
+
+    // Add recommendations
     results.aiSummary.recommendations.forEach((rec, i) => {
       records.push({
         check: 'AI Summary',
@@ -87,6 +137,15 @@ async function generateCSV(results, filepath) {
         value: rec,
       });
     });
+
+    // Add immediate actions
+    if (results.aiSummary.immediateActions?.length > 0) {
+      records.push({
+        check: 'AI Summary',
+        key: 'immediate_actions',
+        value: results.aiSummary.immediateActions.join('; '),
+      });
+    }
   }
 
   for (const [check, result] of Object.entries(results.results)) {

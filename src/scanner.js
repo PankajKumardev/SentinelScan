@@ -38,6 +38,20 @@ const checks = [
   { name: 'Rate limiting assessment', value: 'rateLimiting' },
 ];
 
+function getRiskEmoji(riskLevel) {
+  switch (riskLevel?.toLowerCase()) {
+    case 'low':
+      return '🟢';
+    case 'medium':
+      return '🟡';
+    case 'high':
+    case 'critical':
+      return '🔴';
+    default:
+      return '⚪';
+  }
+}
+
 async function run() {
   let url, selectedChecks, format, outputDir;
 
@@ -164,6 +178,65 @@ async function run() {
   const reportPath = await generate(results, format, outputPath);
 
   console.log(chalk.green(`Report generated: ${reportPath}`));
+
+  // Display AI summary in terminal if available
+  if (results.aiSummary) {
+    console.log(chalk.blue('\n🤖 AI Security Assessment:'));
+    console.log(chalk.yellow('─'.repeat(50)));
+
+    const riskEmoji = getRiskEmoji(results.aiSummary.overallRisk);
+    console.log(`Rating: ${chalk.bold(results.aiSummary.rating)} ${riskEmoji}`);
+    console.log(`Risk Level: ${results.aiSummary.overallRisk} ${riskEmoji}`);
+    console.log(`Severity Score: ${results.aiSummary.severityScore}/100`);
+    console.log(`Summary: ${results.aiSummary.summary}`);
+
+    if (results.aiSummary.criticalIssues?.length > 0) {
+      console.log(chalk.red('\n🚨 Critical Issues:'));
+      results.aiSummary.criticalIssues.forEach((issue) => {
+        console.log(`  • ${issue}`);
+      });
+    }
+
+    console.log(chalk.green('\n✅ Key Recommendations:'));
+    results.aiSummary.recommendations.forEach((rec, i) => {
+      console.log(`  ${i + 1}. ${rec}`);
+    });
+
+    if (results.aiSummary.immediateActions?.length > 0) {
+      console.log(chalk.red('\n⏰ Immediate Actions (24 hours):'));
+      results.aiSummary.immediateActions.forEach((action, i) => {
+        console.log(`  ${i + 1}. ${action}`);
+      });
+    }
+
+    console.log(chalk.yellow('─'.repeat(50)));
+  }
+
+  // Offer AI chat option
+  if (process.env.GROQ_API_KEY) {
+    const { startChat } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'startChat',
+        message: chalk.cyan(
+          '🤖 Would you like to chat with AI about these scan results?'
+        ),
+        default: false,
+      },
+    ]);
+
+    if (startChat) {
+      const { default: AIChat } = await import('./utils/aiChat.js');
+      const aiChat = new AIChat(results);
+      await aiChat.startInteractiveChat();
+    }
+  } else {
+    console.log(
+      chalk.yellow(
+        '\n💡 Tip: Set up GROQ_API_KEY in .env for AI-powered analysis and interactive chat!'
+      )
+    );
+  }
 }
 
 export { run };

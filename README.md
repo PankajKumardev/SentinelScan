@@ -129,9 +129,12 @@ In today's digital landscape, web security is paramount. SentinelScan helps deve
 
 ### 20. Rate Limiting Assessment
 
-- Tests server response to multiple rapid requests
-- Detects rate limiting and throttling mechanisms
-- Identifies potential DDoS vulnerabilities
+- Makes 15 sequential requests with realistic delays (200ms between requests)
+- Detects rate limiting, throttling, and progressive blocking mechanisms
+- Analyzes response patterns and timing to identify security controls
+- Checks for rate limiting headers (X-RateLimit-\*) and Retry-After
+- Identifies vulnerabilities to brute force attacks, DoS attacks, and API abuse
+- Provides detailed response pattern analysis (first 5 vs last 5 requests)
 
 ## 📦 Installation
 
@@ -201,23 +204,59 @@ node src/cli.js --no-banner https://example.com all JSON ./reports
 
 ## 🤖 AI-Powered Analysis
 
-Every report includes an intelligent AI summary generated using Groq API:
+SentinelScan includes streamlined AI analysis powered by Groq API, providing focused, actionable security insights.
 
-- **Security Rating**: A-F grade based on overall posture
-- **Executive Summary**: 2-3 sentence assessment
-- **Actionable Recommendations**: 3-5 specific improvement steps
+### AI Features
+
+- **Concise Security Summary**: Brief, clear assessment of overall security posture
+- **Smart Rating System**: A-F grade based on vulnerability severity and risk
+- **Color-Coded Risk Indicators**: Visual severity indicators (🟢 Low, 🟡 Medium, 🔴 High/Critical)
+- **Critical Issues Highlighting**: Focus on the most important security problems
+- **Actionable Recommendations**: 3 key steps to improve security
+- **Immediate Action Items**: Urgent tasks to complete within 24 hours
+- **Interactive AI Chat**: Ask detailed questions about scan results
+
+### AI Summary Includes
+
+- **Security Rating**: A-F grade with severity score (0-100)
+- **Risk Level**: Critical/High/Medium/Low overall assessment with color indicators (🟢 Low, 🟡 Medium, 🔴 High/Critical)
+- **Key Recommendations**: 3 prioritized improvement actions
+- **Critical Issues**: Most important vulnerabilities found
+- **Immediate Actions**: Urgent 24-hour remediation tasks
 
 ### Setup AI Analysis
 
 1. Get a Groq API key from [groq.com](https://groq.com)
 2. Create `.env` file in project root:
-   ```
+   ```bash
    GROQ_API_KEY=your_api_key_here
    GROQ_MODEL=llama-3.3-70b-versatile
    ```
 3. Install dependencies: `npm install`
 
-The AI analysis runs automatically with each scan and enhances all report formats.
+### Interactive AI Chat
+
+After each scan, you'll be prompted to chat with AI about the results. You can also analyze existing reports:
+
+```bash
+# Analyze existing scan report
+npm start --ai-analyze reports/security-scan-2025-10-28.json
+
+# Or use the script
+npm run ai-chat reports/security-scan-2025-10-28.json
+```
+
+### AI Chat Examples
+
+Ask questions like:
+
+- _"What are the most critical vulnerabilities?"_
+- _"How do I fix the XSS vulnerability?"_
+- _"What's the overall security rating?"_
+- _"What should I do immediately?"_
+- _"Can you explain the severity score?"_
+
+The AI provides **concise, actionable responses** (2-3 sentences max) focused on the most important insights.
 
 ## 🏗️ Project Structure
 
@@ -250,7 +289,8 @@ sentinelscan/
 │   └── utils/
 │       ├── fetchPage.js    # HTTP request utilities
 │       ├── reportGenerator.js # Report generation
-│       └── aiSummary.js    # AI analysis integration
+│       ├── aiSummary.js    # AI analysis integration
+│       └── aiChat.js       # Interactive AI chat functionality
 ├── reports/                # Default output directory
 ├── package.json            # Dependencies and scripts
 └── README.md              # This file

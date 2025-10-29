@@ -4,6 +4,7 @@ import figlet from 'figlet';
 import chalk from 'chalk';
 import fs from 'fs';
 import { run } from './scanner.js';
+import AIChat from './utils/aiChat.js';
 
 function renderBanner({ noBanner } = {}) {
   if (noBanner) return;
@@ -26,29 +27,58 @@ function renderBanner({ noBanner } = {}) {
   }
 }
 
+async function runAIAnalysis(reportFile) {
+  try {
+    console.log(chalk.blue(`Loading scan results from: ${reportFile}`));
+
+    if (!fs.existsSync(reportFile)) {
+      console.error(chalk.red('Error: Report file not found'));
+      process.exit(1);
+    }
+
+    const reportData = JSON.parse(fs.readFileSync(reportFile, 'utf8'));
+    console.log(chalk.green('✅ Report loaded successfully'));
+    console.log(chalk.gray(`URL: ${reportData.url}`));
+    console.log(chalk.gray(`Timestamp: ${reportData.timestamp}`));
+    console.log('');
+
+    const aiChat = new AIChat(reportData);
+    await aiChat.startInteractiveChat();
+  } catch (error) {
+    console.error(chalk.red('Error loading report:'), error.message);
+    process.exit(1);
+  }
+}
+
 function showHelp() {
   console.log(chalk.yellow('Usage:'));
   console.log('  npm start [options] [url] [checks] [format] [output-dir]');
   console.log('  npm start --bulk-file <file>');
+  console.log('  npm start --ai-analyze <report.json>');
   console.log('');
   console.log(chalk.yellow('Options:'));
-  console.log('  --help, -h          Show this help message');
-  console.log('  --no-banner         Hide the banner');
+  console.log('  --help, -h              Show this help message');
+  console.log('  --no-banner             Hide the banner');
   console.log(
-    '  --bulk-file <file>  Scan multiple URLs from a file (one URL per line)'
+    '  --bulk-file <file>      Scan multiple URLs from a file (one URL per line)'
+  );
+  console.log(
+    '  --ai-analyze <file>     Start AI chat analysis on existing scan report'
   );
   console.log('');
   console.log(chalk.yellow('Arguments:'));
   console.log(
-    '  url                 Website URL to scan (e.g., https://example.com)'
+    '  url                     Website URL to scan (e.g., https://example.com)'
   );
   console.log(
-    '  checks              Comma-separated list of checks (default: all)'
+    '  checks                  Comma-separated list of checks (default: all)'
   );
   console.log(
-    '  format              Report format: PDF, CSV, or JSON (default: JSON)'
+    '  format                  Report format: PDF, CSV, or JSON (default: JSON)'
   );
-  console.log('  output-dir          Output directory (default: ./reports)');
+  console.log(
+    '  output-dir              Output directory (default: ./reports)'
+  );
   console.log('');
   console.log(chalk.yellow('Available checks:'));
   console.log('  tls, headers, methods, mixedContent, robots, cookies, xss,');
@@ -62,6 +92,7 @@ function showHelp() {
   console.log('  npm start https://example.com');
   console.log('  npm start https://example.com tls,headers,xss PDF');
   console.log('  npm start --bulk-file urls.txt');
+  console.log('  npm start --ai-analyze reports/security-scan-2025-10-28.json');
   console.log(
     '  npm start --no-banner https://example.com all JSON ./my-reports'
   );
@@ -73,13 +104,22 @@ async function main() {
   // Parse command line arguments
   const args = process.argv.slice(2);
 
-  // Check for help first
+  // Check for help first - BEFORE anything else
   const helpIndex = args.indexOf('--help');
   const hIndex = args.indexOf('-h');
   if (helpIndex !== -1 || hIndex !== -1) {
     renderBanner();
     showHelp();
     process.exit(0);
+  }
+
+  // Check for AI analysis command
+  const aiAnalysisIndex = args.indexOf('--ai-analyze');
+  if (aiAnalysisIndex !== -1 && args[aiAnalysisIndex + 1]) {
+    const reportFile = args[aiAnalysisIndex + 1];
+    renderBanner();
+    await runAIAnalysis(reportFile);
+    return;
   }
 
   const noBannerIndex = args.indexOf('--no-banner');
